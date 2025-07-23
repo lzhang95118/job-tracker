@@ -57,7 +57,7 @@
   <h1>Job Tracker</h1>
 
   <div id="job-table">
-    <table hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing"
+    <table hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing?select=job_title,company,deadline,interview_date,status,source_url"
            hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"}'
            hx-trigger="load"
            hx-target="#job-table"
@@ -73,7 +73,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td colspan="6">Loading...</td></tr>
+        <tr hx-trigger="revealed" hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing?select=job_title,company,deadline,interview_date,status,source_url"
+            hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"}'
+            hx-swap="outerHTML">
+          <td colspan="6">Loading jobs...</td>
+        </tr>
       </tbody>
     </table>
   </div>
