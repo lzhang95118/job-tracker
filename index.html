@@ -5,111 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Tracker</title>
 
-  <!-- 全局样式 -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- HTMX（懒加载 edit.html / form.html） -->
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 
-  <!-- Supabase SDK + 主逻辑 -->
   <script type="module" defer>
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    /* ---------- Supabase 初始化 ---------- */
+    /* ---------- Supabase ---------- */
     const supabase = createClient(
       "https://noyxgznbnarahetfecxj.supabase.co",
-      "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"
+      "YOUR_PUBLIC_SUPABASE_KEY"
     );
 
-    /* ---------- 公共变量 ---------- */
-    let cache = [];  // 缓存最新拉取的数据
+    /* ---------- 全局缓存 ---------- */
+    let cache = [];
 
-    /* ---------- 首次加载 ---------- */
-    document.addEventListener("DOMContentLoaded", loadJobs);
+    /* ---------- 主入口 ---------- */
+    document.addEventListener("DOMContentLoaded", () => {
+      loadJobs();
 
-    /* ---------- 事件：新增或编辑后刷新 ---------- */
-    window.addEventListener("jobAdded",    loadJobs);
-    window.addEventListener("jobUpdated",  loadJobs);
-
-    /* ---------- 搜索框实时过滤 ---------- */
-    document.addEventListener("input", e=>{
-      if(e.target.id === "search-box"){
-        renderTable(cache, null, e.target.value);
-      }
+      /* 列表编辑完 -> 本页获得焦点 or storage 事件 -> reload */
+      window.addEventListener("focus", maybeReloadAfterEdit);
+      window.addEventListener("storage", e => {
+        if (e.key === "jobUpdated") loadJobs();
+      });
     });
 
-    /* ---------- 拉取 & 渲染 ---------- */
+    /* ---------- 数据查询 & 渲染 ---------- */
     async function loadJobs(){
       const { data, error } = await supabase
-        .from("view_upcoming_or_interviewing")  // 只读视图
-        .select("*");
+        .from("general_application")            // ← 直接查表
+        .select("*")
+        .order("deadline", {ascending: true});
       renderTable(data, error);
     }
+    window.loadJobs = loadJobs;   // 暴露给子窗口（可选）
 
     function renderTable(data=[], error=null, keyword=''){
       cache = data || [];
-      const container = document.getElementById("job-table");
+      const box = document.getElementById("job-table");
 
-      if(error){ container.textContent = "Error: " + error.message; return; }
-      if(!Array.isArray(data) || !data.length){ container.textContent = "No data."; return; }
+      if(error){ box.textContent = "Error: " + error.message; return; }
+      if(!Array.isArray(data) || !data.length){ box.textContent = "No data."; return; }
 
-      /* 关键词过滤 */
       const q = keyword.trim().toLowerCase();
       const rows = q
         ? data.filter(j =>
             (j.job_title||'').toLowerCase().includes(q) ||
             (j.company||'').toLowerCase().includes(q)   ||
-            (j.vacancy_code||'').toLowerCase().includes(q)
-          )
+            (j.vacancy_code||'').toLowerCase().includes(q))
         : data;
 
-      /* 生成表格 */
       const tbl = document.createElement("table");
       const head = tbl.insertRow();
-      ["Company","Job Title","Deadline",
-       "Interview","Status","Actions"]
-        .forEach(t=>{
-          const th = document.createElement("th");
-          th.textContent = t;
-          head.appendChild(th);
-        });
+      ["Company","Job Title","Deadline","Interview",
+       "Status","Apply Date","Actions"]
+        .forEach(t=>{const th=document.createElement("th");th.textContent=t;head.appendChild(th);});
 
       rows.forEach(j=>{
         const r = tbl.insertRow();
         r.insertCell().textContent = j.company;
         r.insertCell().innerHTML  = `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
-        r.insertCell().textContent = j.deadline       ?? '';
-        r.insertCell().textContent = j.interview_date ?? '';
-        r.insertCell().textContent = j.status         ?? '';
+        r.insertCell().textContent = j.deadline        ?? '';
+        r.insertCell().textContent = j.interview_date  ?? '';
+        r.insertCell().textContent = j.status          ?? '';
+        r.insertCell().textContent = j.apply_date      ?? '';
         r.insertCell().innerHTML =
-          `<button
-              hx-get="edit.html?id=${j.id}"
-              hx-target="#form-container"
-              hx-swap="innerHTML"
-            >Edit</button>`;
+          `<button onclick="openEdit(${j.id})">Edit</button>`;
       });
 
-      container.replaceChildren(tbl);
+      box.replaceChildren(tbl);
     }
+
+    /* ---------- 打开编辑窗 ---------- */
+    window.openEdit = function(id){
+      window.open(
+        `edit.html?id=${id}`,
+        "editJob",
+        "width=600,height=450"
+      );
+    };
+
+    /* ---------- 焦点回到主窗时，若检测到 storage 标记则刷新 ---------- */
+    function maybeReloadAfterEdit(){
+      if(localStorage.getItem("jobUpdated")){
+        localStorage.removeItem("jobUpdated");
+        loadJobs();
+      }
+    }
+
+    /* ---------- 搜索框 ---------- */
+    window.addEventListener("input", e=>{
+      if(e.target.id==="search-box") renderTable(cache,null,e.target.value);
+    });
   </script>
 </head>
 
 <body>
   <h1>Job Tracker</h1>
 
-  <!-- 搜索 -->
   <label>
     🔍 Search:
     <input id="search-box" placeholder="Title / Company / Vacancy Code">
   </label>
 
-  <!-- 表格占位 -->
   <div id="job-table">Loading…</div>
 
-  <!-- 新增按钮 / 表单 / 编辑弹层都会装进这里 -->
   <div id="form-container">
     <button
-      id="show-form-btn"
       hx-get="form.html"
       hx-target="#form-container"
       hx-swap="innerHTML">
