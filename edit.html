@@ -1,0 +1,60 @@
+<!-- 保存到仓库根目录，和 form.html 平级 -->
+<link rel="stylesheet" href="style.css">
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  const supabase = createClient(
+    "https://noyxgznbnarahetfecxj.supabase.co",
+    "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"
+  );
+
+  // 1️⃣ 解析 URL 参数，把当前行数据填进表单
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");                     // 主键
+  const src = params.get("source_url");            // 其它字段也可以这么带
+  async function init() {
+    const { data, error } = await supabase
+      .from("general_application")                 // ← 目标表
+      .select("*").eq("id", id).single();
+    if (error) { alert(error.message); return; }
+    Object.entries(data).forEach(([k, v])=>{
+      const el = document.querySelector(`[name=${k}]`);
+      if(el) el.value = v ?? "";
+    });
+  }
+  init();
+
+  // 2️⃣ 提交保存
+  document.getElementById("editForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    const { error } = await supabase
+      .from("general_application")
+      .update({
+        status:         f.status,
+        apply_date:     f.apply_date || null,
+        interview_date: f.interview_date || null
+      })
+      .eq("id", id);
+    if (error) { alert(error.message); return; }
+
+    // 触发父页刷新 & 关闭弹层
+    window.parent.dispatchEvent(new CustomEvent("jobUpdated"));
+    if (window.parent.document.getElementById("form-container"))
+        window.parent.document.getElementById("form-container").innerHTML = "";
+  });
+</script>
+
+<h3>Edit Job</h3>
+<form id="editForm">
+  <input type="hidden" name="id">
+  <label>Status:
+    <input name="status" required>
+  </label><br>
+  <label>Apply Date:
+    <input type="date" name="apply_date">
+  </label><br>
+  <label>Interview Date:
+    <input type="date" name="interview_date">
+  </label><br><br>
+  <button>Save</button>
+</form>
