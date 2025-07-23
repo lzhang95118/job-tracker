@@ -1,0 +1,62 @@
+<div id="add-job-container">
+  <button id="toggle-form" onclick="toggleForm()" style="margin-bottom: 1rem;">
+    ➕ Add New Job
+  </button>
+
+  <form id="add-job-form" style="display: none;"
+        hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
+        hx-headers='{
+          "apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9",
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        }'
+        hx-trigger="submit"
+        hx-swap="none"
+        onsubmit="this.reset(); alert('Submitted!');">
+    <h2>Add New Job</h2>
+
+    <label>
+      Job Title:
+      <input name="job_title" placeholder="e.g. Data Analyst" required />
+    </label>
+
+    <label>
+      Company:
+      <input name="company" placeholder="e.g. UCL" required />
+    </label>
+
+    <label>
+      Application URL:
+      <input name="source_url" placeholder="Paste job link here" required />
+    </label>
+
+    <label>
+      Deadline:
+      <input name="deadline" type="date" title="Deadline for submission" />
+    </label>
+
+    <label>
+      Status:
+      <select name="status">
+        <option value="">-- Select Status --</option>
+        <option value="draft">Draft</option>
+        <option value="applied">Applied</option>
+        <option value="interviewing">Interviewing</option>
+      </select>
+    </label>
+
+    <label>
+      Interview Date:
+      <input name="interview_date" type="date" title="Leave blank if not scheduled" />
+    </label>
+
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<script>
+  function toggleForm() {
+    const form = document.getElementById('add-job-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
