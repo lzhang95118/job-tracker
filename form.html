@@ -1,42 +1,34 @@
-<div id="add-job-container">
-  <button id="toggle-form" onclick="toggleForm()" style="margin-bottom: 1rem;">
-    ➕ Add New Job
-  </button>
-
-  <form id="add-job-form" style="display: none;"
+<div id="add-job-form-container">
+  <form id="add-job-form"
         hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
-        hx-headers='{
-          "apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9",
-          "Content-Type": "application/json",
-          "Prefer": "return=representation"
-        }'
+        hx-headers='{"apikey":"sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9","Content-Type":"application/json","Prefer":"return=representation"}'
         hx-trigger="submit"
         hx-swap="none"
-        onsubmit="this.reset(); alert('Submitted!');">
+        onsubmit="this.reset(); htmx.trigger('#job-table','load'); alert('Job added!');">
+        
     <h2>Add New Job</h2>
-
     <label>
-      Job Title:
-      <input name="job_title" placeholder="e.g. Data Analyst" required />
+      Job Title:<br>
+      <input name="job_title" placeholder="e.g. Data Analyst" required/>
+    </label>
+    
+    <label>
+      Company:<br>
+      <input name="company" placeholder="e.g. UCL" required/>
     </label>
 
     <label>
-      Company:
-      <input name="company" placeholder="e.g. UCL" required />
+      Application URL:<br>
+      <input name="source_url" placeholder="Paste job link here" required/>
     </label>
 
     <label>
-      Application URL:
-      <input name="source_url" placeholder="Paste job link here" required />
+      Deadline:<br>
+      <input name="deadline" type="date"/>
     </label>
 
     <label>
-      Deadline:
-      <input name="deadline" type="date" title="Deadline for submission" />
-    </label>
-
-    <label>
-      Status:
+      Status:<br>
       <select name="status">
         <option value="">-- Select Status --</option>
         <option value="draft">Draft</option>
@@ -46,17 +38,10 @@
     </label>
 
     <label>
-      Interview Date:
-      <input name="interview_date" type="date" title="Leave blank if not scheduled" />
+      Interview Date:<br>
+      <input name="interview_date" type="date"/>
     </label>
 
     <button type="submit">Submit</button>
   </form>
 </div>
-
-<script>
-  function toggleForm() {
-    const form = document.getElementById('add-job-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  }
-</script>
