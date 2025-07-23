@@ -4,7 +4,7 @@
         hx-headers='{"apikey":"sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9","Content-Type":"application/json","Prefer":"return=representation"}'
         hx-trigger="submit"
         hx-swap="none"
-        onsubmit="this.reset(); htmx.trigger('#job-table','load'); alert('Job added!');">
+        onsubmit="this.reset(); htmx.trigger(document.body,'jobAdded'); alert('Job added!');"
         
     <h2>Add New Job</h2>
     <label>
