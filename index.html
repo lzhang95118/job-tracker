@@ -4,77 +4,115 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Tracker</title>
+
+  <!-- 全局样式 -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- HTMX（懒加载 edit.html / form.html） -->
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-  <!-- Supabase SDK（ESM 版） -->
+
+  <!-- Supabase SDK + 主逻辑 -->
   <script type="module" defer>
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    // ✅ URL 修正
+    /* ---------- Supabase 初始化 ---------- */
     const supabase = createClient(
       "https://noyxgznbnarahetfecxj.supabase.co",
       "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"
     );
 
-    // ---------- 渲染函数 ----------
-    function renderTable(data = [], error) {
-      const container = document.getElementById("job-table");
-      if (error) {
-        container.textContent = `Error: ${error.message}`;
-        return;
-      }
-      if (!Array.isArray(data) || !data.length) {
-        container.textContent = "No data.";
-        return;
-      }
+    /* ---------- 公共变量 ---------- */
+    let cache = [];  // 缓存最新拉取的数据
 
-      const table = document.createElement("table");
-      const headerRow = table.insertRow();
-      ["Company", "Job Title", "Deadline", "Interview Date",
-       "Deadline Status", "Interview Status"]
-        .forEach(text => {
-          const th = document.createElement("th");
-          th.textContent = text;
-          headerRow.appendChild(th);
-        });
-
-      data.forEach(j => {
-        const r = table.insertRow();
-        r.insertCell().textContent = j.company ?? "";
-        r.insertCell().innerHTML =
-          `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
-        r.insertCell().textContent = j.deadline ?? "";
-        r.insertCell().textContent = j.interview_date ?? "";
-        r.insertCell().textContent = j.deadline_status ?? "";
-        r.insertCell().textContent = j.interview_status ?? "";
-      });
-
-      container.replaceChildren(table);
-    }
-
-    // ---------- 首次加载 ----------
-    async function loadJobs() {
-      const { data, error } = await supabase.from("view_upcoming_or_interviewing").select("*");
-      renderTable(data, error);
-    }
+    /* ---------- 首次加载 ---------- */
     document.addEventListener("DOMContentLoaded", loadJobs);
 
-    // ---------- 监听「新增职位」自定义事件 ----------
-    document.body.addEventListener("jobAdded", loadJobs);
+    /* ---------- 事件：新增或编辑后刷新 ---------- */
+    window.addEventListener("jobAdded",    loadJobs);
+    window.addEventListener("jobUpdated",  loadJobs);
+
+    /* ---------- 搜索框实时过滤 ---------- */
+    document.addEventListener("input", e=>{
+      if(e.target.id === "search-box"){
+        renderTable(cache, null, e.target.value);
+      }
+    });
+
+    /* ---------- 拉取 & 渲染 ---------- */
+    async function loadJobs(){
+      const { data, error } = await supabase
+        .from("view_upcoming_or_interviewing")  // 只读视图
+        .select("*");
+      renderTable(data, error);
+    }
+
+    function renderTable(data=[], error=null, keyword=''){
+      cache = data || [];
+      const container = document.getElementById("job-table");
+
+      if(error){ container.textContent = "Error: " + error.message; return; }
+      if(!Array.isArray(data) || !data.length){ container.textContent = "No data."; return; }
+
+      /* 关键词过滤 */
+      const q = keyword.trim().toLowerCase();
+      const rows = q
+        ? data.filter(j =>
+            (j.job_title||'').toLowerCase().includes(q) ||
+            (j.company||'').toLowerCase().includes(q)   ||
+            (j.vacancy_code||'').toLowerCase().includes(q)
+          )
+        : data;
+
+      /* 生成表格 */
+      const tbl = document.createElement("table");
+      const head = tbl.insertRow();
+      ["Company","Job Title","Deadline",
+       "Interview","Status","Actions"]
+        .forEach(t=>{
+          const th = document.createElement("th");
+          th.textContent = t;
+          head.appendChild(th);
+        });
+
+      rows.forEach(j=>{
+        const r = tbl.insertRow();
+        r.insertCell().textContent = j.company;
+        r.insertCell().innerHTML  = `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
+        r.insertCell().textContent = j.deadline       ?? '';
+        r.insertCell().textContent = j.interview_date ?? '';
+        r.insertCell().textContent = j.status         ?? '';
+        r.insertCell().innerHTML =
+          `<button
+              hx-get="edit.html?id=${j.id}"
+              hx-target="#form-container"
+              hx-swap="innerHTML"
+            >Edit</button>`;
+      });
+
+      container.replaceChildren(tbl);
+    }
   </script>
 </head>
+
 <body>
   <h1>Job Tracker</h1>
+
+  <!-- 搜索 -->
+  <label>
+    🔍 Search:
+    <input id="search-box" placeholder="Title / Company / Vacancy Code">
+  </label>
 
   <!-- 表格占位 -->
   <div id="job-table">Loading…</div>
 
-  <!-- 新增职位按钮 / 表单占位 -->
+  <!-- 新增按钮 / 表单 / 编辑弹层都会装进这里 -->
   <div id="form-container">
-    <button id="show-form-btn"
-            hx-get="form.html"
-            hx-target="#form-container"
-            hx-swap="innerHTML">
+    <button
+      id="show-form-btn"
+      hx-get="form.html"
+      hx-target="#form-container"
+      hx-swap="innerHTML">
       ＋ Add New Job
     </button>
   </div>
