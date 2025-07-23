@@ -1,84 +1,50 @@
-<link rel="stylesheet" href="style.css">
-
-<!-- 弹窗主体 -->
-<div class="dialog-wrapper">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Edit Job</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="padding:20px;max-width:500px;">
   <h3>Edit Job</h3>
+
   <form id="editForm">
     <input type="hidden" name="id">
 
     <label>Status:
       <input name="status" required>
-    </label><br>
+    </label><br><br>
 
     <label>Apply&nbsp;Date:
       <input type="date" name="apply_date">
-    </label><br>
+    </label><br><br>
 
     <label>Interview&nbsp;Date:
       <input type="date" name="interview_date">
     </label><br><br>
 
     <button>Save</button>
-    <button type="button" onclick="closeSelf()">Cancel</button>
+    <button type="button" onclick="window.close()">Cancel</button>
   </form>
-</div>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  const supabase = createClient(
-    "https://noyxgznbnarahetfecxj.supabase.co",
-    "YOUR_PUBLIC_SUPABASE_KEY"
-  );
+    const supabase = createClient(
+      "https://noyxgznbnarahetfecxj.supabase.co",
+      "YOUR_PUBLIC_SUPABASE_KEY"
+    );
 
-  /* ---------- 解析 id ---------- */
-  const params = new URLSearchParams(location.search);
-  const id = params.get("id");
+    /* ---------- 取 id ---------- */
+    const id = new URLSearchParams(location.search).get("id");
+    if(!id){ alert("No id"); window.close(); }
 
-  /* ---------- 拉取现有数据并填表 ---------- */
-  const { data, error } = await supabase
-    .from("general_application")   // ← 可写表
-    .select("*").eq("id", id).single();
-
-  if(error){ alert(error.message); closeSelf(); }
-  else {
-    Object.entries(data).forEach(([k,v])=>{
-      const el = document.querySelector(`[name=${k}]`);
-      if(el) el.value = v ?? "";
-    });
-  }
-
-  /* ---------- 保存 ---------- */
-  document.getElementById("editForm").addEventListener("submit", async e=>{
-    e.preventDefault();
-    const formData = Object.fromEntries(new FormData(e.target));
-    const { error } = await supabase
+    /* ---------- 填表 ---------- */
+    const { data, error } = await supabase
       .from("general_application")
-      .update({
-        status:         formData.status,
-        apply_date:     formData.apply_date     || null,
-        interview_date: formData.interview_date || null
-      })
-      .eq("id", id);
+      .select("*").eq("id", id).single();
 
-    if(error){ alert(error.message); }
-    else {
-      /* 通知父页刷新 & 关闭自身 */
-      window.parent.dispatchEvent(new CustomEvent("jobUpdated"));
-      closeSelf();
-    }
-  });
+    if(error){ alert(error.message); window.close(); }
 
-  /* ---------- 工具：关闭自身 ---------- */
-  function closeSelf(){
-    /* 把 #form-container 清空即可“关闭”弹层 */
-    const slot = window.parent.document.getElementById("form-container");
-    if(slot) slot.innerHTML = "";
-  }
-</script>
-
-<style>
-.dialog-wrapper{
-  background:#fff;border:1px solid #ccc;padding:20px;
-}
-</style>
+    for(const [k,v] of Object.entries(data)){
+      const el = document.qu
