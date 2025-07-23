@@ -1,9 +1,8 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
@@ -11,35 +10,20 @@
 <body>
   <h1>Job Tracker</h1>
 
-  <div id="job-table">
-    <table hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing"
-           hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"}'
-           hx-trigger="load"
-           hx-target="#job-table"
-           hx-swap="outerHTML">
-      <thead>
-        <tr>
-          <th>Job Title</th>
-          <th>Company</th>
-          <th>Deadline</th>
-          <th>Interview Date</th>
-          <th>Status</th>
-          <th>Source</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="6">Loading jobs...</td></tr>
-      </tbody>
-    </table>
+  <div id="job-table"
+       hx-get="table.html"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    Loading table...
   </div>
 
-  <button id="add-job-button" 
-          hx-get="form.html" 
-          hx-target="#form-container" 
-          hx-swap="innerHTML">
-    ＋ Add Job
-  </button>
-
-  <div id="form-container"></div>
+  <div id="form-container">
+    <button id="show-form-btn"
+            hx-get="form.html"
+            hx-target="#form-container"
+            hx-swap="innerHTML">
+      ＋ Add New Job
+    </button>
+  </div>
 </body>
 </html>
