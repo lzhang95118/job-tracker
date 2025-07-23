@@ -17,11 +17,22 @@
       "YOUR_PUBLIC_SUPABASE_KEY"
     );
 
-    /* ---------- 全局缓存 ---------- */
+    /* ---------- 全局缓存 & 列定义 ---------- */
     let cache = [];
+    let addBtnHTML = '';
+    const columns = [
+      {key:'company',        label:'Company'},
+      {key:'job_title',      label:'Job Title'},
+      {key:'deadline',       label:'Deadline'},
+      {key:'interview_date', label:'Interview'},
+      {key:'status',         label:'Status'},
+      {key:'apply_date',     label:'Apply Date'},
+      {key:'actions',        label:'Actions'}
+    ];
 
     /* ---------- 主入口 ---------- */
     document.addEventListener("DOMContentLoaded", () => {
+      addBtnHTML = document.getElementById('form-container').innerHTML;
       loadJobs();
 
       /* 列表编辑完 -> 本页获得焦点 or storage 事件 -> reload */
@@ -49,32 +60,47 @@
       if(!Array.isArray(data) || !data.length){ box.textContent = "No data."; return; }
 
       const q = keyword.trim().toLowerCase();
-      const rows = q
-        ? data.filter(j =>
-            (j.job_title||'').toLowerCase().includes(q) ||
-            (j.company||'').toLowerCase().includes(q)   ||
-            (j.vacancy_code||'').toLowerCase().includes(q))
-        : data;
+      const statusFilter = document.getElementById('status-filter').value;
+      const rows = data.filter(j => {
+        const okSearch = !q ||
+          (j.job_title||'').toLowerCase().includes(q) ||
+          (j.company||'').toLowerCase().includes(q)   ||
+          (j.vacancy_code||'').toLowerCase().includes(q);
+        const okStatus = !statusFilter || j.status === statusFilter;
+        return okSearch && okStatus;
+      });
 
       const tbl = document.createElement("table");
       const head = tbl.insertRow();
-      ["Company","Job Title","Deadline","Interview",
-       "Status","Apply Date","Actions"]
-        .forEach(t=>{const th=document.createElement("th");th.textContent=t;head.appendChild(th);});
+      columns.forEach(c=>{const th=document.createElement('th');th.textContent=c.label;head.appendChild(th);});
 
       rows.forEach(j=>{
         const r = tbl.insertRow();
-        r.insertCell().textContent = j.company;
+        r.insertCell().textContent = j.company ?? '';
         r.insertCell().innerHTML  = `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
         r.insertCell().textContent = j.deadline        ?? '';
         r.insertCell().textContent = j.interview_date  ?? '';
         r.insertCell().textContent = j.status          ?? '';
         r.insertCell().textContent = j.apply_date      ?? '';
-        r.insertCell().innerHTML =
-          `<button onclick="openEdit(${j.id})">Edit</button>`;
+        r.insertCell().innerHTML = `<button onclick="openEdit(${j.id})">Edit</button>`;
       });
 
       box.replaceChildren(tbl);
+      updateColumnVisibility();
+    }
+
+    function updateColumnVisibility(){
+      const selected = new Set(
+        Array.from(document.querySelectorAll('#column-selector input'))
+          .filter(cb=>cb.checked)
+          .map(cb=>cb.dataset.col)
+      );
+      const keys = columns.map(c=>c.key);
+      document.querySelectorAll('#job-table table tr').forEach(row=>{
+        row.querySelectorAll('th,td').forEach((cell,i)=>{
+          cell.style.display = selected.has(keys[i]) ? '' : 'none';
+        });
+      });
     }
 
     /* ---------- 打开编辑窗 ---------- */
@@ -98,6 +124,15 @@
     window.addEventListener("input", e=>{
       if(e.target.id==="search-box") renderTable(cache,null,e.target.value);
     });
+
+    document.getElementById('status-filter').addEventListener('change', () => {
+      renderTable(cache, null, document.getElementById('search-box').value);
+    });
+    document.getElementById('column-selector').addEventListener('change', updateColumnVisibility);
+    document.body.addEventListener('jobAdded', () => {
+      loadJobs();
+      document.getElementById('form-container').innerHTML = addBtnHTML;
+    });
   </script>
 </head>
 
@@ -108,6 +143,26 @@
     🔍 Search:
     <input id="search-box" placeholder="Title / Company / Vacancy Code">
   </label>
+
+  <label>
+    Status:
+    <select id="status-filter">
+      <option value="">All</option>
+      <option value="draft">Draft</option>
+      <option value="applied">Applied</option>
+      <option value="interviewing">Interviewing</option>
+    </select>
+  </label>
+
+  <div id="column-selector">
+    Show columns:
+    <label><input type="checkbox" data-col="company" checked>Company</label>
+    <label><input type="checkbox" data-col="job_title" checked>Job Title</label>
+    <label><input type="checkbox" data-col="deadline" checked>Deadline</label>
+    <label><input type="checkbox" data-col="interview_date" checked>Interview</label>
+    <label><input type="checkbox" data-col="status" checked>Status</label>
+    <label><input type="checkbox" data-col="apply_date" checked>Apply Date</label>
+  </div>
 
   <div id="job-table">Loading…</div>
 

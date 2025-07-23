@@ -23,6 +23,10 @@
       <input type="date" name="interview_date">
     </label><br><br>
 
+    <label>Notes:
+      <textarea name="notes" rows="3"></textarea>
+    </label><br><br>
+
     <button>Save</button>
     <button type="button" onclick="window.close()">Cancel</button>
   </form>
@@ -35,11 +39,9 @@
       "YOUR_PUBLIC_SUPABASE_KEY"
     );
 
-    /* ---------- 取 id ---------- */
     const id = new URLSearchParams(location.search).get("id");
     if(!id){ alert("No id"); window.close(); }
 
-    /* ---------- 填表 ---------- */
     const { data, error } = await supabase
       .from("general_application")
       .select("*").eq("id", id).single();
@@ -47,4 +49,28 @@
     if(error){ alert(error.message); window.close(); }
 
     for(const [k,v] of Object.entries(data)){
-      const el = document.qu
+      const el = document.querySelector(`[name=${k}]`);
+      if(el) el.value = v ?? "";
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async e=>{
+      e.preventDefault();
+      const f = Object.fromEntries(new FormData(e.target));
+      const { error } = await supabase
+        .from("general_application")
+        .update({
+          status:         f.status,
+          apply_date:     f.apply_date     || null,
+          interview_date: f.interview_date || null,
+          notes:          f.notes          || null
+        })
+        .eq("id", id);
+
+      if(error){ alert(error.message); return; }
+
+      localStorage.setItem("jobUpdated", Date.now());
+      window.close();
+    });
+  </script>
+</body>
+</html>
