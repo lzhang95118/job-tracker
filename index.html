@@ -54,7 +54,7 @@
 
     // ---------- 首次加载 ----------
     async function loadJobs() {
-      const { data, error } = await supabase.from("job_view").select("*");
+      const { data, error } = await supabase.from("view_upcoming_or_interviewing").select("*");
       renderTable(data, error);
     }
     document.addEventListener("DOMContentLoaded", loadJobs);
