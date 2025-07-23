@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Tracker</title>
+  <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      color: #343a40;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #dee2e6;
+      text-align: left;
+    }
+    th {
+      background-color: #f1f3f5;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    form {
+      margin-top: 2rem;
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ced4da;
+    }
+    input, select {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Job Tracker</h1>
+
+  <div id="job-table">
+    <table hx-get="https://YOUR-SUPABASE-URL.supabase.co/rest/v1/view_upcoming_or_interviewing"
+           hx-headers='{"apikey": "YOUR-ANON-KEY"}'
+           hx-trigger="load"
+           hx-target="#job-table"
+           hx-swap="outerHTML">
+      <thead>
+        <tr>
+          <th>Job Title</th>
+          <th>Company</th>
+          <th>Deadline</th>
+          <th>Interview Date</th>
+          <th>Status</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <form hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
+        hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9", "Content-Type": "application/json", "Prefer": "return=representation"}'
+        hx-trigger="submit"
+        hx-swap="none"
+        onsubmit="this.reset(); alert('Submitted!');">
+    <h2>Add New Job</h2>
+    <input name="job_title" placeholder="Job Title" required />
+    <input name="company" placeholder="Company" required />
+    <input name="source_url" placeholder="Application URL" required />
+    <input name="deadline" type="date" />
+    <select name="status">
+      <option value="">-- Status (optional) --</option>
+      <option value="draft">Draft</option>
+      <option value="interviewing">Interviewing</option>
+      <option value="applied">Applied</option>
+    </select>
+    <input name="interview_date" type="date" placeholder="Interview Date (optional)" />
+    <button type="submit">Add Job</button>
+  </form>
+</body>
+</html>
