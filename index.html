@@ -6,23 +6,76 @@
   <title>Job Tracker</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+  <!-- Supabase SDK（ESM 版） -->
+  <script type="module" defer>
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    // ✅ URL 修正
+    const supabase = createClient(
+      "https://noyxgznbnarahetfecxj.supabase.co",
+      "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"
+    );
+
+    // ---------- 渲染函数 ----------
+    function renderTable(data = [], error) {
+      const container = document.getElementById("job-table");
+      if (error) {
+        container.textContent = `Error: ${error.message}`;
+        return;
+      }
+      if (!Array.isArray(data) || !data.length) {
+        container.textContent = "No data.";
+        return;
+      }
+
+      const table = document.createElement("table");
+      const headerRow = table.insertRow();
+      ["Company", "Job Title", "Deadline", "Interview Date",
+       "Deadline Status", "Interview Status"]
+        .forEach(text => {
+          const th = document.createElement("th");
+          th.textContent = text;
+          headerRow.appendChild(th);
+        });
+
+      data.forEach(j => {
+        const r = table.insertRow();
+        r.insertCell().textContent = j.company ?? "";
+        r.insertCell().innerHTML =
+          `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
+        r.insertCell().textContent = j.deadline ?? "";
+        r.insertCell().textContent = j.interview_date ?? "";
+        r.insertCell().textContent = j.deadline_status ?? "";
+        r.insertCell().textContent = j.interview_status ?? "";
+      });
+
+      container.replaceChildren(table);
+    }
+
+    // ---------- 首次加载 ----------
+    async function loadJobs() {
+      const { data, error } = await supabase.from("job_view").select("*");
+      renderTable(data, error);
+    }
+    document.addEventListener("DOMContentLoaded", loadJobs);
+
+    // ---------- 监听「新增职位」自定义事件 ----------
+    document.body.addEventListener("jobAdded", loadJobs);
+  </script>
 </head>
 <body>
   <h1>Job Tracker</h1>
 
-  <div id="job-table"
-       hx-get="table.html"
-       hx-trigger="load"
-       hx-swap="outerHTML">
-    Loading table...
-  </div>
+  <!-- 表格占位 -->
+  <div id="job-table">Loading…</div>
 
+  <!-- 新增职位按钮 / 表单占位 -->
   <div id="form-container">
     <button id="show-form-btn"
             hx-get="form.html"
             hx-target="#form-container"
             hx-swap="innerHTML">
-      ＋ Add New Job
+      ＋ Add New Job
     </button>
   </div>
 </body>
