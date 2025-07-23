@@ -44,31 +44,34 @@
 
     /* ---------- 数据查询 & 渲染 ---------- */
     async function loadJobs(){
-      const { data, error } = await supabase
+      const search = document.getElementById('search-box').value.trim();
+      const status = document.getElementById('status-filter').value;
+
+      let q = supabase
         .from("general_application")            // ← 直接查表
         .select("*")
         .order("deadline", {ascending: true});
+
+      if(status) q = q.eq('status', status);
+      if(search){
+        const pattern = `%${search}%`;
+        q = q.or(
+          `job_title.ilike.${pattern},company.ilike.${pattern},vacancy_code.ilike.${pattern}`
+        );
+      }
+
+      const { data, error } = await q;
       renderTable(data, error);
     }
     window.loadJobs = loadJobs;   // 暴露给子窗口（可选）
 
-    function renderTable(data=[], error=null, keyword=''){
+    function renderTable(data=[], error=null){
       cache = data || [];
       const box = document.getElementById("job-table");
 
       if(error){ box.textContent = "Error: " + error.message; return; }
       if(!Array.isArray(data) || !data.length){ box.textContent = "No data."; return; }
-
-      const q = keyword.trim().toLowerCase();
-      const statusFilter = document.getElementById('status-filter').value;
-      const rows = data.filter(j => {
-        const okSearch = !q ||
-          (j.job_title||'').toLowerCase().includes(q) ||
-          (j.company||'').toLowerCase().includes(q)   ||
-          (j.vacancy_code||'').toLowerCase().includes(q);
-        const okStatus = !statusFilter || j.status === statusFilter;
-        return okSearch && okStatus;
-      });
+      const rows = data;
 
       const tbl = document.createElement("table");
       const head = tbl.insertRow();
@@ -122,12 +125,10 @@
 
     /* ---------- 搜索框 ---------- */
     window.addEventListener("input", e=>{
-      if(e.target.id==="search-box") renderTable(cache,null,e.target.value);
+      if(e.target.id==="search-box") loadJobs();
     });
 
-    document.getElementById('status-filter').addEventListener('change', () => {
-      renderTable(cache, null, document.getElementById('search-box').value);
-    });
+    document.getElementById('status-filter').addEventListener('change', loadJobs);
     document.getElementById('column-selector').addEventListener('change', updateColumnVisibility);
     document.body.addEventListener('jobAdded', () => {
       loadJobs();
