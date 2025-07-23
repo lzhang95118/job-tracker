@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Tracker</title>
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
   <style>
@@ -18,6 +18,7 @@
       width: 100%;
       border-collapse: collapse;
       background: white;
+      margin-top: 1rem;
     }
     th, td {
       padding: 0.75rem;
@@ -31,8 +32,9 @@
       color: #007bff;
       text-decoration: none;
     }
-    form {
-      margin-top: 2rem;
+    #add-form {
+      display: none;
+      margin-top: 1rem;
       background: #ffffff;
       padding: 1rem;
       border-radius: 5px;
@@ -56,42 +58,20 @@
 <body>
   <h1>Job Tracker</h1>
 
-  <div id="job-table">
-    <table hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing?select=job_title,company,deadline,interview_date,status,source_url"
-           hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"}'
-           hx-trigger="load"
-           hx-target="#job-table"
-           hx-swap="outerHTML">
-      <thead>
-        <tr>
-          <th>Job Title</th>
-          <th>Company</th>
-          <th>Deadline</th>
-          <th>Interview Date</th>
-          <th>Status</th>
-          <th>Source</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr hx-trigger="revealed" hx-get="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing?select=job_title,company,deadline,interview_date,status,source_url"
-            hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"}'
-            hx-swap="outerHTML">
-          <td colspan="6">Loading jobs...</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <div id="job-table"><p>Loading...</p></div>
 
-  <form hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
+  <button onclick="toggleForm()">+ Add New Job</button>
+
+  <form id="add-form"
+        hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
         hx-headers='{"apikey": "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9", "Content-Type": "application/json", "Prefer": "return=representation"}'
         hx-trigger="submit"
         hx-swap="none"
-        onsubmit="this.reset(); alert('Submitted!');">
-    <h2>Add New Job</h2>
+        onsubmit="this.reset(); alert('Submitted!'); location.reload();">
     <input name="job_title" placeholder="Job Title" required />
     <input name="company" placeholder="Company" required />
     <input name="source_url" placeholder="Application URL" required />
-    <input name="deadline" type="date" />
+    <input name="deadline" type="date" placeholder="Deadline" />
     <select name="status">
       <option value="">-- Status (optional) --</option>
       <option value="draft">Draft</option>
@@ -101,5 +81,60 @@
     <input name="interview_date" type="date" placeholder="Interview Date (optional)" />
     <button type="submit">Add Job</button>
   </form>
+
+  <script>
+    function toggleForm() {
+      const form = document.getElementById("add-form");
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return "-";
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    fetch("https://noyxgznbnarahetfecxj.supabase.co/rest/v1/view_upcoming_or_interviewing", {
+      headers: {
+        apikey: "sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Job Title</th>
+              <th>Company</th>
+              <th>Deadline</th>
+              <th>Interview</th>
+              <th>Status</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      data.forEach(job => {
+        html += `
+          <tr>
+            <td>${job.job_title}</td>
+            <td>${job.company}</td>
+            <td>${formatDate(job.deadline)}<br><small>${job.deadline_status}</small></td>
+            <td>${formatDate(job.interview_date)}<br><small>${job.interview_status}</small></td>
+            <td>${job.status || '-'}</td>
+            <td><a href="${job.source_url}" target="_blank">View</a></td>
+          </tr>`;
+      });
+      html += `</tbody></table>`;
+      document.getElementById("job-table").innerHTML = html;
+    })
+    .catch(err => {
+      document.getElementById("job-table").innerHTML = "<p style='color:red'>Error loading data.</p>";
+      console.error(err);
+    });
+  </script>
 </body>
 </html>
