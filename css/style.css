@@ -1,0 +1,900 @@
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.1rem;
+  font-size: 0.93rem;
+  background: #fff;
+  border: 1.5px solid #e0e0e0;
+}
+th, td {
+  padding: 0.18em 0.32em;
+  border-bottom: 1.5px solid #e0e0e0;
+  border-right: 1.5px solid #e0e0e0;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 0.93em;
+}
+th:last-child, td:last-child {
+  border-right: none;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: #f8f9fa;
+  color: #212529;
+}
+
+.main-container {
+  width: 92vw;
+  max-width: 1100px;
+  min-width: 350px;
+  margin: 2.5rem auto 2rem auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+  padding: 2.5rem 2.5vw 2rem 2.5vw;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.unified-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1.1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  margin-top: 0.5rem;
+}
+.bar-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.bar-item:last-child {
+  justify-content: flex-end;
+}
+
+.add-job-btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: background 0.18s;
+  height: 2.4rem;
+  padding: 0 1rem;
+  width: 100%;
+}
+.add-job-btn:hover {
+  background: #0056b3;
+}
+
+h1, h2 {
+  margin-bottom: 1.5rem;
+  color: #343a40;
+  text-align: center;
+}
+
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 2rem;
+  margin-top: 0.5rem;
+}
+
+.top-bar label, .top-bar > div {
+  margin-bottom: 0;
+  min-width: 180px;
+}
+
+.unified-input {
+  width: 100%;
+  min-width: 0;
+  height: 2.4rem;
+  font-size: 1.05rem;
+  border: 1.5px solid #bfc6ce;
+  border-radius: 5px;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  background: #f8fafd;
+  color: #212529;
+  transition: border 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+.unified-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px #e9f0ff;
+}
+
+
+.compact-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: stretch;
+  width: 100%;
+  margin-bottom: 1.1rem;
+  margin-top: 0.5rem;
+}
+.compact-bar-inner {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-width: 320px;
+  max-width: 100%;
+  margin: 0;
+  gap: 1.2vw;
+  padding-right: 2vw;
+}
+.left-bar-item {
+  flex: 0 0 12%;
+  display: flex;
+  align-items: center;
+}
+.center-bar-item {
+  flex: 0 0 68%;
+  display: flex;
+  align-items: center;
+}
+.right-bar-item {
+  flex: 0 0 20%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.compact-bar > .bar-item {
+  display: none;
+}
+.compact-bar-inner > .bar-item {
+  display: flex;
+  align-items: center;
+}
+
+
+/* 统一所有表单控件样式 */
+.unified-input, .add-job-btn, .status-select, select, input[type="text"], input[type="date"], textarea, button {
+  width: 100%;
+  box-sizing: border-box;
+  height: 2.2rem;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem;
+  border: 1.5px solid #cbd5e0;
+  border-radius: 6px;
+  background: #fff;
+  color: #2d3748;
+  transition: all 0.2s ease;
+}
+
+.unified-input:focus, select:focus, textarea:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+  outline: none;
+}
+
+textarea.unified-input {
+  min-height: 5rem;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+/* 模态窗口中的表单元素样式 */
+.modal-content .unified-input,
+.modal-content select,
+.modal-content textarea {
+  background-color: #f8fafc;
+}
+
+/* 模态窗口中的标签样式 */
+.modal-content label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 0.3rem;
+}
+
+/* 提交按钮样式 */
+.modal-content button[type="submit"],
+button.add-job-btn {
+  background: #3182ce;
+  color: white;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button.unified-input, .add-job-btn {
+  height: 2.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0 1rem;
+  background: #3182ce;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.unified-input:hover, .add-job-btn:hover {
+  background: #2c5282;
+}
+
+/* 修正弹窗内容溢出和按钮可视化问题 */
+.modal-content form, .modal-content .form-group {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.modal-content button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 优化 Save/Cancel 按钮样式 */
+.modal-content .submit-container {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+  justify-content: flex-end;
+}
+
+.modal-content button[type="submit"],
+.modal-content button.cancel-btn {
+  min-width: 110px;
+  height: 2.4rem;
+  background: #3182ce;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  opacity: 1;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.07);
+  margin: 0;
+  outline: none;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+.modal-content button.cancel-btn {
+  background: #e2e8f0;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.modal-content button[type="submit"]:hover,
+.modal-content button[type="submit"]:focus {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(49,130,206,0.13);
+}
+
+.modal-content button.cancel-btn:hover,
+.modal-content button.cancel-btn:focus {
+  background: #cbd5e1;
+  color: #1a202c;
+  box-shadow: 0 4px 16px rgba(160,174,192,0.13);
+}
+
+.modal-content button[disabled],
+.modal-content button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #cbd5e1 !important;
+  color: #a0aec0 !important;
+  box-shadow: none !important;
+}
+
+/* 优化弹窗宽度和edit弹窗内容显示 */
+/* 统一的模态窗口样式 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+/* 统一的模态窗口内容样式 */
+.modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin: 2rem;
+  width: 550px;
+  max-width: calc(100vw - 4rem);
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  box-sizing: border-box;
+  animation: modalAppear 0.2s ease-out;
+}
+
+/* 模态窗口内容布局 */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1.8rem;
+}
+
+/* 添加动画效果 */
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 统一的关闭按钮样式 */
+.modal-close {
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.2rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* 模态窗口内的表单样式 */
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.modal-content .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.modal-content h2 {
+  margin: 0 0 1.5rem 0;
+  padding: 0;
+  font-size: 1.5rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+/* 表单字段布局 */
+.modal-content label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.modal-content .unified-input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  margin-bottom: 0.3rem;
+}
+
+/* Notes 文本框样式 */
+.modal-content textarea {
+  min-height: 5rem;
+  margin-bottom: 1rem;
+}
+
+/* 提交按钮容器 */
+.modal-content .submit-container {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 提交按钮样式 */
+.modal-content button[type="submit"] {
+  min-width: 100px;
+  height: 2.4rem;
+  background: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-content button[type="submit"]:hover {
+  background: #2c5282;
+}
+
+/* Form styles inside modal */
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.modal-content form > div {
+  margin-bottom: 0.5rem;
+}
+
+.modal-content h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 0 0 1.2rem 0;
+  padding: 0;
+}
+
+.modal-content label {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 0.3rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #888;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* 调整 Edit Job 模态窗口大小 */
+#edit-job-modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 860px !important;
+  min-width: 320px;
+  width: 68vw;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.16);
+  margin: 0;
+  padding: 1rem 1.2rem 1rem 1.2rem !important;
+  max-height: 94vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 9999;
+}
+
+/* 调整 Add New Job 模态窗口位置和样式 */
+#add-job-modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 860px !important;
+  min-width: 320px;
+  width: 68vw;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.16);
+  margin: 0;
+  padding: 1rem 1.2rem 1rem 1.2rem !important;
+  max-height: 94vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  z-index: 9999;
+}
+
+@media (max-width: 900px) {
+  #form-modal-content, #edit-job-modal-content, #add-job-modal-content {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 98vw !important;
+    min-width: 0;
+    width: 98vw;
+    padding: 0.7rem 0.5rem 0.7rem 0.5rem !important;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  #form-modal-content, #edit-job-modal-content, #add-job-modal-content {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 99vw !important;
+    min-width: 0;
+    width: 99vw;
+    padding: 0.5rem 0.1rem 0.5rem 0.1rem !important;
+    border-radius: 7px;
+  }
+}
+
+/* 统一label下控件间距 */
+form label, .main-container label {
+  display: block;
+  margin-bottom: 0.7rem;
+  font-size: 0.97rem;
+}
+form input, form select, form textarea {
+  margin-top: 0.18rem;
+}
+
+/* edit status下拉框宽度与其他一致 */
+.status-select {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.89rem;
+  padding: 0.08rem 0.38rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .main-container {
+    padding: 1.2rem 0.5rem;
+    min-width: 0;
+    width: 99vw;
+  }
+  .compact-bar-inner {
+    width: 98vw;
+    min-width: 0;
+    max-width: 99vw;
+  }
+  #form-modal-content, #edit-job-modal-content, #add-job-modal-content {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 98vw !important;
+    min-width: 0;
+    width: 98vw;
+    padding: 0.7rem 0.5rem 0.7rem 0.5rem !important;
+    border-radius: 10px;
+  }
+}
+@media (max-width: 700px) {
+  .main-container {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+  .compact-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+  }
+  .left-bar-item, .right-bar-item {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    justify-content: stretch;
+  }
+}
+@media (max-width: 600px) {
+  .main-container {
+    padding: 0.5rem 0.2rem;
+  }
+  .top-bar {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  #form-modal-content, #edit-job-modal-content, #add-job-modal-content {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 99vw !important;
+    min-width: 0;
+    width: 99vw;
+    padding: 0.5rem 0.1rem 0.5rem 0.1rem !important;
+    border-radius: 7px;
+  }
+  table {
+    font-size: 0.89rem;
+  }
+}
+
+th.sorted-asc::after, th.sorted-desc::after {
+  content: '';
+}
+
+/* 模态窗口和表单样式规范化 */
+.modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.16);
+  margin: 0;
+  padding: 1.5rem;
+  width: 550px;
+  max-width: calc(100vw - 2rem);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* 表单布局容器 */
+.modal-content form,
+#form-modal-inner form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* 表单字段容器 */
+.modal-content form > div,
+#form-modal-inner form > div {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+/* 统一表单控件样式 */
+.modal-content input:not([type="submit"]):not([type="button"]),
+.modal-content select,
+.modal-content textarea,
+#form-modal-inner input:not([type="submit"]):not([type="button"]),
+#form-modal-inner select,
+#form-modal-inner textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  height: 2.2rem;
+  padding: 0.5rem 0.8rem;
+  border: 1.5px solid #cbd5e0;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #2d3748;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+/* 文本域特殊处理 */
+.modal-content textarea,
+#form-modal-inner textarea {
+  min-height: 5rem;
+  height: auto;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* 表单控件焦点状态 */
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus,
+#form-modal-inner input:focus,
+#form-modal-inner select:focus,
+#form-modal-inner textarea:focus {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+  outline: none;
+}
+
+/* 表单标签样式 */
+.modal-content label,
+#form-modal-inner label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+/* 统一按钮样式 */
+.modal-content button,
+.modal-content input[type="submit"],
+.modal-content .btn,
+.modal-content form button[type="submit"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 110px !important;
+  height: 2.4rem !important;
+  padding: 0 1.2rem !important;
+  background: #3182ce !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.1) !important;
+  margin: 0 !important;
+  outline: none !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  width: auto !important;
+}
+
+/* Save按钮特殊样式 */
+.modal-content form button[type="submit"],
+#form-modal-inner button[type="submit"] {
+  background: #2563eb !important;
+  color: #fff !important;
+  width: 100% !important;
+  margin-top: 1rem !important;
+  box-shadow: 0 2px 12px rgba(37,99,235,0.2) !important;
+}
+
+/* 按钮悬停效果 */
+.modal-content button:hover,
+.modal-content input[type="submit"]:hover,
+.modal-content .btn:hover,
+.modal-content form button[type="submit"]:hover {
+  background: #1d4ed8 !important;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.25) !important;
+}
+
+/* Cancel按钮样式 */
+.modal-content button.cancel-btn,
+.modal-content .btn-secondary {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  box-shadow: 0 2px 8px rgba(148,163,184,0.1) !important;
+}
+
+.modal-content button.cancel-btn:hover,
+.modal-content .btn-secondary:hover {
+  background: #cbd5e1 !important;
+  color: #334155 !important;
+  box-shadow: 0 4px 16px rgba(148,163,184,0.15) !important;
+}
+
+/* 响应式布局 */
+@media (max-width: 900px) {
+  .modal-content {
+    width: 90vw;
+    padding: 1.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95vw;
+    padding: 1rem;
+  }
+  
+  .modal-content form {
+    gap: 0.8rem;
+  }
+  
+  .unified-input, select, textarea {
+    font-size: 0.92rem;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Modal responsive styles */
+@media (max-width: 900px) {
+  .modal-content {
+    max-width: 90vw;
+    min-width: 0;
+    width: 90vw;
+    padding: 1.2rem !important;
+  }
+  
+  .modal-content form {
+    gap: 0.6rem;
+  }
+  
+  .modal-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    max-width: 95vw;
+    padding: 1rem !important;
+    border-radius: 10px;
+  }
+  
+  .unified-input, .status-select, select, input[type="text"], input[type="date"], textarea {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.6rem;
+  }
+  
+  textarea.unified-input {
+    min-height: 3.5rem;
+  }
+}
+
+/* Modal improvements */
+.modal-inner {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.modal-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #4a5568;
+  width: 100%;
+}
+
+.modal-form .unified-input,
+.modal-form select,
+.modal-form textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 0.8rem !important;
+}
+
+.modal-form textarea.unified-input {
+  min-height: 5rem;
+  height: auto;
+  resize: vertical;
+}
+
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+.modal-content {
+  position: relative !important;
+  width: 550px !important;
+  max-width: 95vw !important;
+  margin: 2vh auto !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+  padding: 1.8rem !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  animation: modalAppear 0.2s ease-out !important;
+}

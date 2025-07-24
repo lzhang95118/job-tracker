@@ -1,52 +1,45 @@
-<div id="add-job-form-container">
+<div class="modal-inner">
   <form id="add-job-form"
+        class="modal-form"
         hx-post="https://noyxgznbnarahetfecxj.supabase.co/rest/v1/general_application"
         hx-headers='{"apikey":"sb_publishable_uykLhOlTN6dhDiTr2SmdJQ_TV-XOhR9","Content-Type":"application/json","Prefer":"return=representation"}'
         hx-trigger="submit"
         hx-swap="none"
-        onsubmit="this.reset(); htmx.trigger(document.body,'jobAdded'); alert('Job added!');"
-        
+        onsubmit="htmx.trigger(document.body,'jobAdded'); setTimeout(()=>{document.getElementById('form-container').innerHTML='';},100); alert('Job added!'); this.reset(); return false;">
     <h2>Add New Job</h2>
     <label>
       Job Title:<br>
-      <input name="job_title" placeholder="e.g. Data Analyst" required/>
+      <input name="job_title" placeholder="e.g. Data Analyst" required class="unified-input"/>
     </label>
-    
     <label>
       Company:<br>
-      <input name="company" placeholder="e.g. UCL" required/>
+      <input name="company" placeholder="e.g. UCL" required class="unified-input"/>
     </label>
-
     <label>
       Application URL:<br>
-      <input name="source_url" placeholder="Paste job link here" required/>
+      <input name="source_url" placeholder="Paste job link here" required class="unified-input"/>
     </label>
-
     <label>
       Deadline:<br>
-      <input name="deadline" type="date"/>
+      <input name="deadline" type="date" class="unified-input"/>
     </label>
-
     <label>
       Status:<br>
-      <select name="status">
+      <select name="status" class="unified-input status-select">
         <option value="">-- Select Status --</option>
         <option value="draft">Draft</option>
         <option value="applied">Applied</option>
         <option value="interviewing">Interviewing</option>
       </select>
     </label>
-
     <label>
       Interview Date:<br>
-      <input name="interview_date" type="date"/>
+      <input name="interview_date" type="date" class="unified-input"/>
     </label>
-
     <label>
       Notes:<br>
-      <textarea name="notes" rows="3"></textarea>
+      <textarea name="notes" rows="3" class="unified-input"></textarea>
     </label>
-
-    <button type="submit">Submit</button>
+    <button type="submit" class="unified-input">Submit</button>
   </form>
 </div>

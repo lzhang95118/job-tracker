@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Job Tracker</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 
   <script type="module" defer>
@@ -24,30 +24,71 @@
       {key:'company',        label:'Company'},
       {key:'job_title',      label:'Job Title'},
       {key:'deadline',       label:'Deadline'},
-      {key:'interview_date', label:'Interview'},
       {key:'status',         label:'Status'},
-      {key:'apply_date',     label:'Apply Date'},
+      {key:'apply_date',     label:'Apply Date'},
+      {key:'interview_date', label:'Interview'},
       {key:'actions',        label:'Actions'}
     ];
+    let sortField = 'deadline';
+    let sortAsc = true;
 
     /* ---------- 主入口 ---------- */
     document.addEventListener("DOMContentLoaded", () => {
       addBtnHTML = document.getElementById('form-container').innerHTML;
       loadJobs();
 
-      /* 列表编辑完 -> 本页获得焦点 or storage 事件 -> reload */
+      // 事件监听器注册全部放到这里，确保元素已渲染
       window.addEventListener("focus", maybeReloadAfterEdit);
       window.addEventListener("storage", e => {
         if (e.key === "jobUpdated") loadJobs();
+      });
+      document.getElementById('status-filter').addEventListener('change', () => {
+        renderTable(cache, null, document.getElementById('search-box').value);
+      });
+      document.body.addEventListener('jobAdded', () => {
+        loadJobs();
+        document.getElementById('form-container').innerHTML = addBtnHTML;
+      });
+      window.addEventListener("input", e => {
+        if(e.target.id === "search-box") renderTable(cache, null, e.target.value);
+      });
+      // Add New Job 弹窗逻辑
+      const addJobBtn = document.getElementById('add-job-btn');
+      const formModal = document.getElementById('form-modal');
+      const formModalInner = document.getElementById('form-modal-inner');
+      const closeFormModal = document.getElementById('close-form-modal');
+      addJobBtn.addEventListener('click', e => {
+        e.preventDefault();
+        fetch('form.html').then(r=>r.text()).then(html=>{
+          formModalInner.innerHTML = html;
+          formModal.style.display = 'flex';
+        });
+      });
+      closeFormModal.addEventListener('click', ()=>{
+        formModal.style.display = 'none';
+        formModalInner.innerHTML = '';
+      });
+      formModal.addEventListener('click', e=>{
+        if(e.target===formModal){
+          formModal.style.display = 'none';
+          formModalInner.innerHTML = '';
+        }
+      });
+      document.body.addEventListener('jobAdded', () => {
+        formModal.style.display = 'none';
+        formModalInner.innerHTML = '';
+        loadJobs();
+        document.getElementById('form-container').innerHTML = '';
       });
     });
 
     /* ---------- 数据查询 & 渲染 ---------- */
     async function loadJobs(){
       const { data, error } = await supabase
-        .from("general_application")            // ← 直接查表
+        .from("general_application")
         .select("*")
         .order("deadline", {ascending: true});
+      console.log("Supabase返回：", data, error); // ← 加这一行
       renderTable(data, error);
     }
     window.loadJobs = loadJobs;   // 暴露给子窗口（可选）
@@ -61,55 +102,137 @@
 
       const q = keyword.trim().toLowerCase();
       const statusFilter = document.getElementById('status-filter').value;
-      const rows = data.filter(j => {
+      let rows = data.filter(j => {
         const okSearch = !q ||
           (j.job_title||'').toLowerCase().includes(q) ||
           (j.company||'').toLowerCase().includes(q)   ||
           (j.vacancy_code||'').toLowerCase().includes(q);
-        const okStatus = !statusFilter || j.status === statusFilter;
+        // status 筛选逻辑
+        let okStatus = true;
+        if(statusFilter==='applied'){
+          okStatus = ['applied','interviewing','gone','rejected'].includes(j.status);
+        }else if(statusFilter==='rejected'){
+          okStatus = ['rejected','gone'].includes(j.status);
+        }else if(statusFilter){
+          okStatus = j.status === statusFilter;
+        }
         return okSearch && okStatus;
       });
 
+      // 排序
+      if(sortField) {
+        rows = rows.slice().sort((a, b) => {
+          let va = a[sortField] ?? '';
+          let vb = b[sortField] ?? '';
+          // 日期字段特殊处理
+          if(['deadline','apply_date','interview_date'].includes(sortField)) {
+            va = va ? new Date(va) : new Date(0);
+            vb = vb ? new Date(vb) : new Date(0);
+            return sortAsc ? va - vb : vb - va;
+          }
+          // 其他字段字符串排序
+          va = (va+'').toLowerCase();
+          vb = (vb+'').toLowerCase();
+          if(va < vb) return sortAsc ? -1 : 1;
+          if(va > vb) return sortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+
       const tbl = document.createElement("table");
       const head = tbl.insertRow();
-      columns.forEach(c=>{const th=document.createElement('th');th.textContent=c.label;head.appendChild(th);});
+      columns.forEach(c=>{
+        const th=document.createElement('th');
+        th.textContent=c.label;
+        th.className = 'sortable' + (sortField===c.key ? (sortAsc? ' sorted-asc':' sorted-desc') : '');
+        // 排序箭头
+        if (sortField === c.key) {
+          const icon = document.createElement('span');
+          icon.style.marginLeft = '0.3em';
+          icon.style.fontWeight = 'bold';
+          icon.style.color = '#007bff';
+          icon.textContent = sortAsc ? '▲' : '▼';
+          th.appendChild(icon);
+        }
+        if(c.key!=='actions') {
+          th.addEventListener('click',()=>{
+            if(sortField===c.key) sortAsc=!sortAsc; else {sortField=c.key;sortAsc=true;}
+            renderTable(cache,null,document.getElementById('search-box').value);
+          });
+        }
+        head.appendChild(th);
+      });
 
       rows.forEach(j=>{
         const r = tbl.insertRow();
         r.insertCell().textContent = j.company ?? '';
         r.insertCell().innerHTML  = `<a href="${j.source_url}" target="_blank">${j.job_title}</a>`;
         r.insertCell().textContent = j.deadline        ?? '';
-        r.insertCell().textContent = j.interview_date  ?? '';
         r.insertCell().textContent = j.status          ?? '';
         r.insertCell().textContent = j.apply_date      ?? '';
-        r.insertCell().innerHTML = `<button onclick="openEdit(${j.id})">Edit</button>`;
+        r.insertCell().textContent = j.interview_date  ?? '';
+        r.insertCell().innerHTML = `<button onclick="openEdit('${j.id}')">Edit</button>`;
       });
 
       box.replaceChildren(tbl);
-      updateColumnVisibility();
-    }
-
-    function updateColumnVisibility(){
-      const selected = new Set(
-        Array.from(document.querySelectorAll('#column-selector input'))
-          .filter(cb=>cb.checked)
-          .map(cb=>cb.dataset.col)
-      );
-      const keys = columns.map(c=>c.key);
-      document.querySelectorAll('#job-table table tr').forEach(row=>{
-        row.querySelectorAll('th,td').forEach((cell,i)=>{
-          cell.style.display = selected.has(keys[i]) ? '' : 'none';
-        });
-      });
     }
 
     /* ---------- 打开编辑窗 ---------- */
-    window.openEdit = function(id){
-      window.open(
-        `edit.html?id=${id}`,
-        "editJob",
-        "width=600,height=450"
-      );
+    window.openEdit = async function(id){
+      const formModal = document.getElementById('form-modal');
+      const formModalInner = document.getElementById('form-modal-inner');
+      
+      // 先获取数据
+      const { data, error } = await supabase
+        .from("general_application")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if(error){ alert(error.message); return; }
+      
+      // 加载模板
+      const response = await fetch('edit.html');
+      const html = await response.text();
+      formModalInner.innerHTML = html;
+      formModal.style.display = 'flex';
+      
+      // 填充数据
+      const form = document.getElementById('editForm');
+      if(form) {
+        for(const [k,v] of Object.entries(data)){
+          const el = form.querySelector(`[name=${k}]`);
+          if(el) {
+            if(el.tagName==="SELECT") el.value = v ?? "";
+            else el.value = v ?? "";
+          }
+        }
+        
+        // 添加表单提交事件
+        form.addEventListener("submit", async e => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const f = Object.fromEntries(formData);
+          
+          const { error } = await supabase
+            .from("general_application")
+            .update({
+              status: f.status,
+              apply_date: f.apply_date || null,
+              interview_date: f.interview_date || null,
+              notes: f.notes || null
+            })
+            .eq("id", id);
+  
+          if(error){ alert(error.message); return; }
+          
+          // 成功后关闭窗口并刷新数据
+          formModal.style.display = 'none';
+          formModalInner.innerHTML = '';
+          localStorage.setItem("jobUpdated", "true");
+          loadJobs();
+        });
+      }
     };
 
     /* ---------- 焦点回到主窗时，若检测到 storage 标记则刷新 ---------- */
@@ -119,60 +242,40 @@
         loadJobs();
       }
     }
-
-    /* ---------- 搜索框 ---------- */
-    window.addEventListener("input", e=>{
-      if(e.target.id==="search-box") renderTable(cache,null,e.target.value);
-    });
-
-    document.getElementById('status-filter').addEventListener('change', () => {
-      renderTable(cache, null, document.getElementById('search-box').value);
-    });
-    document.getElementById('column-selector').addEventListener('change', updateColumnVisibility);
-    document.body.addEventListener('jobAdded', () => {
-      loadJobs();
-      document.getElementById('form-container').innerHTML = addBtnHTML;
-    });
   </script>
 </head>
 
 <body>
-  <h1>Job Tracker</h1>
-
-  <label>
-    🔍 Search:
-    <input id="search-box" placeholder="Title / Company / Vacancy Code">
-  </label>
-
-  <label>
-    Status:
-    <select id="status-filter">
-      <option value="">All</option>
-      <option value="draft">Draft</option>
-      <option value="applied">Applied</option>
-      <option value="interviewing">Interviewing</option>
-    </select>
-  </label>
-
-  <div id="column-selector">
-    Show columns:
-    <label><input type="checkbox" data-col="company" checked>Company</label>
-    <label><input type="checkbox" data-col="job_title" checked>Job Title</label>
-    <label><input type="checkbox" data-col="deadline" checked>Deadline</label>
-    <label><input type="checkbox" data-col="interview_date" checked>Interview</label>
-    <label><input type="checkbox" data-col="status" checked>Status</label>
-    <label><input type="checkbox" data-col="apply_date" checked>Apply Date</label>
-  </div>
-
-  <div id="job-table">Loading…</div>
-
-  <div id="form-container">
-    <button
-      hx-get="form.html"
-      hx-target="#form-container"
-      hx-swap="innerHTML">
-      ＋ Add New Job
-    </button>
+  <div class="main-container">
+    <h1 style="margin-bottom:1.2rem;">Job Tracker - LANG</h1>
+    <div class="top-bar compact-bar">
+      <div class="compact-bar-inner">
+        <div class="bar-item left-bar-item">
+          <select id="status-filter" class="unified-input status-select">
+            <option value="">All</option>
+            <option value="draft">Draft</option>
+            <option value="applied">Applied</option>
+            <option value="interviewing">Interviewing</option>
+            <option value="gone">Gone</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="bar-item center-bar-item">
+          <input id="search-box" class="unified-input" placeholder="Title / Company / Vacancy Code">
+        </div>
+        <div class="bar-item right-bar-item">
+          <button class="add-job-btn unified-input" id="add-job-btn">＋ Add New Job</button>
+        </div>
+      </div>
+    </div>
+    <div id="job-table">Loading…</div>
+    <div id="form-modal" class="modal-overlay">
+      <div id="form-modal-content" class="modal-content">
+        <button id="close-form-modal" class="modal-close">×</button>
+        <div id="form-modal-inner" class="modal-inner"></div>
+      </div>
+    </div>
+    <div id="form-container"></div>
   </div>
 </body>
 </html>

@@ -1,0 +1,39 @@
+/* 备份原紧凑表单控件和表格样式 */
+.unified-input, .add-job-btn, .status-select, select, input[type="text"], input[type="date"], textarea, button {
+  width: 100%;
+  box-sizing: border-box;
+  height: 2rem;
+  font-size: 0.98rem;
+  padding: 0.2rem 0.7rem;
+}
+
+textarea.unified-input {
+  min-height: 2.2rem;
+  height: 3.2rem;
+  resize: vertical;
+}
+
+button.unified-input, .add-job-btn {
+  height: 2.1rem;
+  font-size: 1.01rem;
+  padding: 0 1.1rem;
+}
+
+#form-modal-content {
+  max-width: 50vw !important;
+  min-width: 260px;
+  width: 50vw;
+  left: 0;
+  right: auto;
+  margin-left: 0;
+  margin-right: auto;
+  padding: 1.2rem 1.1rem 1.2rem 1.1rem !important;
+}
+
+.status-select {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.98rem;
+  padding: 0.2rem 0.7rem;
+  box-sizing: border-box;
+}

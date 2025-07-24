@@ -1,72 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8"/>
-  <title>Edit Job</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body style="padding:20px;max-width:500px;">
-  <h3>Edit Job</h3>
-
-  <form id="editForm">
-    <input type="hidden" name="id">
-
-    <label>Status:
-      <input name="status" required>
-    </label><br><br>
-
-    <label>Apply&nbsp;Date:
-      <input type="date" name="apply_date">
-    </label><br><br>
-
-    <label>Interview&nbsp;Date:
-      <input type="date" name="interview_date">
-    </label><br><br>
-
-    <label>Notes:
-      <textarea name="notes" rows="3"></textarea>
-    </label><br><br>
-
-    <button>Save</button>
-    <button type="button" onclick="window.close()">Cancel</button>
-  </form>
-
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-    const supabase = createClient(
-      "https://noyxgznbnarahetfecxj.supabase.co",
-      "YOUR_PUBLIC_SUPABASE_KEY"
-    );
-
-    const id = new URLSearchParams(location.search).get("id");
-    if(!id){ alert("No id"); window.close(); }
-
-    const { data, error } = await supabase
-      .from("general_application")
-      .select("*").eq("id", id).single();
-
-    if(error){ alert(error.message); window.close(); }
-
-    for(const [k,v] of Object.entries(data)){
-      const el = document.querySelector(`[name=${k}]`);
-      if(el) el.value = v ?? "";
-    }
-
-    document.getElementById("editForm").addEventListener("submit", async e=>{
-      e.preventDefault();
-      const f = Object.fromEntries(new FormData(e.target));
-      const { error } = await supabase
-        .from("general_application")
-        .update({
-          status:         f.status,
-          apply_date:     f.apply_date     || null,
-          interview_date: f.interview_date || null,
-          notes:          f.notes          || null
-        })
-        .eq("id", id);
-
-      if(error){ alert(error.message); return; }
+<div class="modal-inner">
+  <h2>Edit Job</h2>
+  <form id="editForm" class="modal-form">
+    <!-- form已上移至标题栏下方，padding已合并 -->
+      <input type="hidden" name="id">
+      <div style="margin-bottom:0.5rem;">
+        <label>Company:<br>
+          <input name="company" readonly class="unified-input" style="background:#f8fafd;cursor:not-allowed;">
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Job Title:<br>
+          <input name="job_title" readonly class="unified-input" style="background:#f8fafd;cursor:not-allowed;">
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Deadline:<br>
+          <input name="deadline" readonly class="unified-input" style="background:#f8fafd;cursor:not-allowed;">
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Status:<br>
+          <select name="status" required class="unified-input status-select">
+            <option value="draft">Draft</option>
+            <option value="applied">Applied</option>
+            <option value="interviewing">Interviewing</option>
+            <option value="gone">Gone</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Apply&nbsp;Date:<br>
+          <input type="date" name="apply_date" class="unified-input">
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Interview&nbsp;Date:<br>
+          <input type="date" name="interview_date" class="unified-input">
+        </label>
+      </div>
+      <div style="margin-bottom:0.5rem;">
+        <label>Notes:<br>
+          <textarea name="notes" rows="3" class="unified-input"></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="unified-input submit-btn">Save</button>
+        <button type="button" class="unified-input cancel-btn" onclick="document.getElementById('form-modal').style.display='none';">Cancel</button>
+      </div>
+    </form>
+  </div>
 
       localStorage.setItem("jobUpdated", Date.now());
       window.close();
